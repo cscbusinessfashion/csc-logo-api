@@ -29,10 +29,10 @@ module.exports = async function handler(req, res) {
     });
 
     const data = await response.json();
-    const svg = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text.trim() : '';
+    const svg = data.content && data.content[0] && data.content[0].text ? data.content[0].text.trim() : '';
 
     if (!svg.includes('<svg')) {
-      return res.status(500).json({ error: 'Invalid SVG', raw: svg });
+      return res.status(500).json({ error: 'Invalid SVG', raw: svg, debug: data });
     }
 
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
