@@ -19,10 +19,22 @@ module.exports = async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
-        max_tokens: 1000,
+        max_tokens: 1500,
         messages: [{
           role: 'user',
-          content: 'Create a beautiful modern SVG logo icon for "' + name + '" (Indonesian university student organization at Telkom University). Rules: viewBox="0 0 36 36" exactly. Dark background rect rx="10" fill="#0f0f0f". Use #E8001C red as main accent. Abstract geometric/symbolic shapes only, NO text or letters. Bold, simple, recognizable at small size. Return ONLY the raw SVG element, no markdown, no backticks, no explanation.'
+          content: `Create a beautiful modern SVG logo icon for "${name}" which is an Indonesian university student organization at Telkom University.
+
+First, think about what "${name}" represents and choose appropriate:
+- Colors that match the organization type (e.g. gold/navy for business orgs, green for nature/environment, blue for tech, etc)
+- Symbol that represents the organization's purpose (e.g. briefcase/crown for business, circuit for tech, book for academic, etc)
+
+Rules:
+- viewBox="0 0 36 36" exactly
+- rounded background rect rx="10"  
+- Use 2-3 colors that fit the organization's character
+- Abstract geometric/symbolic icon — NO text or letters
+- Bold, simple, recognizable at small size
+- Return ONLY the raw SVG element with xmlns="http://www.w3.org/2000/svg", no markdown, no backticks, no explanation`
         }]
       })
     });
@@ -30,15 +42,11 @@ module.exports = async function handler(req, res) {
     const data = await response.json();
     let svg = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content ? data.choices[0].message.content.trim() : '';
 
-    // Strip markdown backticks if any
     svg = svg.replace(/```svg/gi, '').replace(/```/g, '').trim();
-
-    // Extract just the SVG element
     const match = svg.match(/<svg[\s\S]*<\/svg>/i);
     if (!match) return res.status(500).json({ error: 'Invalid SVG', raw: svg });
     svg = match[0];
 
-    // Add xmlns if missing
     if (!svg.includes('xmlns')) {
       svg = svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
     }
