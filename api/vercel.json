@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/logo.js": {
+      "maxDuration": 30
+    }
+  }
+}
