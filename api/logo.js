@@ -1,7 +1,8 @@
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Vary', 'Origin');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { name } = req.query;
@@ -31,7 +32,7 @@ module.exports = async function handler(req, res) {
     const svg = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content ? data.choices[0].message.content.trim() : '';
 
     if (!svg.includes('<svg')) {
-      return res.status(500).json({ error: 'Invalid SVG', raw: svg, debug: data });
+      return res.status(500).json({ error: 'Invalid SVG', raw: svg });
     }
 
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
