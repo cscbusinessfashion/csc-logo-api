@@ -30,7 +30,8 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     const svg = data.content?.[0]?.text?.trim() || '';
-    if (!svg.includes('<svg')) return res.status(500).json({ error: 'Invalid SVG' });
+    if (!svg.includes('<svg')) return res.status(500).json({ error: 'Invalid SVG', raw: svg });
+}
 
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     res.setHeader('Content-Type', 'image/svg+xml');
