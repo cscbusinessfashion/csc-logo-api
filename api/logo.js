@@ -7,24 +7,28 @@ module.exports = async function handler(req, res) {
   const { name } = req.query;
   if (!name) return res.status(400).json({ error: 'name required' });
 
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  if (!GEMINI_API_KEY) return res.status(500).json({ error: 'API key not configured' });
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_API_KEY) return res.status(500).json({ error: 'API key not configured' });
 
   try {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent?key=' + GEMINI_API_KEY, {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + GROQ_API_KEY
+      },
       body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: 'Create a beautiful modern SVG logo icon for "' + name + '" (Indonesian university student organization at Telkom University). Rules: viewBox="0 0 36 36" exactly. Dark background rect rx="10" fill="#0f0f0f". Use #E8001C red as main accent. Abstract geometric/symbolic shapes only, NO text or letters. Bold, simple, recognizable at small size. Return ONLY the raw SVG element, no markdown, no backticks, no explanation.'
-          }]
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: 'Create a beautiful modern SVG logo icon for "' + name + '" (Indonesian university student organization at Telkom University). Rules: viewBox="0 0 36 36" exactly. Dark background rect rx="10" fill="#0f0f0f". Use #E8001C red as main accent. Abstract geometric/symbolic shapes only, NO text or letters. Bold, simple, recognizable at small size. Return ONLY the raw SVG element, no markdown, no backticks, no explanation.'
         }]
       })
     });
 
     const data = await response.json();
-    const svg = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0].text ? data.candidates[0].content.parts[0].text.trim() : '';
+    const svg = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content ? data.choices[0].message.content.trim() : '';
 
     if (!svg.includes('<svg')) {
       return res.status(500).json({ error: 'Invalid SVG', raw: svg, debug: data });
